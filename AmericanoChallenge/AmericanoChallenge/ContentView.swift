@@ -2,27 +2,27 @@ import SwiftUI
 import UIKit
 
 struct ContentView: View {
-    // Variabile di stato per il contatore
+    // State variable for the counter
     @State private var counter = 0
     @State private var NavigatingToSettings = false
     
-    // Variabili di stato per l'animazione dei pulsanti e del numero
+    // State variables for button and number animation
     @State private var shakeAmount: CGFloat = 0
     @State private var isShaking = false
     
-    // Timer per incremento/decremento continuo
+    // Timer for continuous increment/decrement
     @State private var timer: Timer? = nil
     @State private var isIncrementing = false
     @State private var isDecrementing = false
-    @State private var delayTimer: Timer? = nil // Timer per il ritardo prima che inizi a scorrere
+    @State private var delayTimer: Timer? = nil // Timer for delay before starting scrolling
     
-    // Funzione per l'animazione di vibrazione
+    // Function for shake animation
     func shakeButtonAndNumber() {
         if isShaking { return }
         
         isShaking = true
         withAnimation(.linear(duration: 0.1).repeatCount(3, autoreverses: true)) {
-            shakeAmount = 10 // Movimento a destra
+            shakeAmount = 10 // Move to the right
         }
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
@@ -31,30 +31,30 @@ struct ContentView: View {
         }
     }
     
-    // Funzione per generare vibrazione (feedback tattile)
+    // Function to generate haptic feedback (vibration)
     func generateHapticFeedback() {
         let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
         impactFeedback.prepare()
         impactFeedback.impactOccurred()
     }
     
-    // Funzione per incrementare
+    // Function to increment the counter
     func increment() {
         counter += 1
     }
     
-    // Funzione per decrementare
+    // Function to decrement the counter
     func decrement() {
         if counter > 0 {
             counter -= 1
         } else {
-            shakeButtonAndNumber() // Vibrazione quando il contatore è 0
+            shakeButtonAndNumber() // Shake when the counter is 0
         }
     }
     
-    // Funzione per iniziare il timer per l'incremento dopo il ritardo
+    // Function to start the timer for increment after delay
     func startDelayedIncrement() {
-        delayTimer?.invalidate() // Invalida eventuali timer precedenti
+        delayTimer?.invalidate() // Invalidate any previous timers
         
         delayTimer = Timer.scheduledTimer(withTimeInterval: 0.3, repeats: false) { _ in
             self.isIncrementing = true
@@ -65,9 +65,9 @@ struct ContentView: View {
         }
     }
     
-    // Funzione per iniziare il timer per il decremento dopo il ritardo
+    // Function to start the timer for decrement after delay
     func startDelayedDecrement() {
-        delayTimer?.invalidate() // Invalida eventuali timer precedenti
+        delayTimer?.invalidate() // Invalidate any previous timers
         
         delayTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { _ in
             self.isDecrementing = true
@@ -78,7 +78,7 @@ struct ContentView: View {
         }
     }
     
-    // Funzione per fermare il timer
+    // Function to stop the timer
     func stopTimer() {
         timer?.invalidate()
         timer = nil
@@ -92,83 +92,91 @@ struct ContentView: View {
         NavigationStack {
             ZStack {
                 VStack {
-                    // Prima parte: 30% dello schermo (bianco)
+                    // First part: 30% of the screen (white)
                     Color.white
                         .frame(height: UIScreen.main.bounds.height * 0.3)
                     
-                    // Seconda parte: 70% dello schermo (nero)
+                    // Second part: 70% of the screen (black)
                     Color(red: 28/255, green: 28/255, blue: 28/255)
                         .frame(height: UIScreen.main.bounds.height * 0.7)
                 }
                 .edgesIgnoringSafeArea(.all)
                 
-                // Sfondo animato
+                // Animated background
                 AnimatedTextView()
                     .accessibilityHidden(true)
 
                 ZStack {
                     VStack {
                         HStack {
-                            // Tasto meno con Long Press
+                            // Minus button with Long Press
                             Button(action: {
                                 decrement()
-                                generateHapticFeedback() // Vibrazione subito al clic
+                                generateHapticFeedback() // Vibration immediately on click
                             }) {
                                Text("⌄")
-                                    .frame(width: 130, height: 300)
+                                    .frame(width: 100, height: 300)
                                     .font(.custom("basis33", size: 160))
                                     .background(Color(red: 28/255, green: 28/255, blue: 28/255))
                                     .foregroundColor(.white)
                                     .cornerRadius(8)
+                                   // .border(Color.white, width: 1)
                             }
                             .offset(y: 80)
-                            .offset(x:-40)
+                            .offset(x: 0)
                             .offset(x: shakeAmount)
                             .onLongPressGesture(
                                 minimumDuration: 0.1,
                                 maximumDistance: 100,
                                 pressing: { isPressing in
                                     if isPressing {
-                                        startDelayedDecrement() // Avvia il decremento con ritardo
+                                        startDelayedDecrement() // Start decrementing with delay
                                     } else {
-                                        stopTimer() // Ferma il timer quando non si preme più
+                                        stopTimer() // Stop the timer when no longer pressed
                                     }
                                 },
                                 perform: {}
                             )
                             .accessibilityLabel("Decrement")
                             
-                            Text("\(counter)")
-                                .font(.custom("Droid 1997", size: 100))
-                                .foregroundStyle(.white)
-                                .offset(x: shakeAmount)
-                                .offset(y: 7)
-                                .animation(.bouncy(duration: 0.5), value: counter)
-
-                            // Tasto più con Long Press
+                            // Use GeometryReader to prevent the number from affecting the button position
+                            GeometryReader { geometry in
+                                Text("\(counter)")
+                                    .font(.custom("Droid 1997", size: 100))
+                                    .foregroundStyle(.white)
+                                    .offset(x: shakeAmount)
+                                    .offset(y: 7)
+                                    .animation(.bouncy(duration: 0.5), value: counter)
+                                    .frame(width: geometry.size.width, height: geometry.size.height, alignment: .center) // Keep the position constant
+                            }
+                            .frame(width: 150, height: 150) // Set fixed width and height to avoid movement
+                           // .border(Color.white, width: 1)
+                            
+                            // Plus button with Long Press
                             Button(action: {
                                 increment()
-                                generateHapticFeedback() // Vibrazione subito al clic
+                                generateHapticFeedback() // Vibration immediately on click
                             }) {
                                Text("⌃")
-                                    .frame(width: 130, height: 200)
+                                    .frame(width: 100, height: 200)
                                     .font(.custom("basis3", size: 160))
-                                    .offset(y:-16)
+                                    .offset(y: -16)
                                     .background(Color(red: 28/255, green: 28/255, blue: 28/255))
                                     .foregroundColor(.white)
                                     .cornerRadius(8)
+                                   // .border(Color.white, width: 1)
                             }
                             .offset(y: -40)
-                            .offset(x: 40)
+                            .offset(x: 0)
                             .offset(x: shakeAmount)
                             .onLongPressGesture(
                                 minimumDuration: 0.1,
                                 maximumDistance: 100,
                                 pressing: { isPressing in
                                     if isPressing {
-                                        startDelayedIncrement() // Avvia l'incremento con ritardo
+                                        startDelayedIncrement() // Start incrementing with delay
                                     } else {
-                                        stopTimer() // Ferma il timer quando non si preme più
+                                        stopTimer() // Stop the timer when no longer pressed
                                     }
                                 },
                                 perform: {}
@@ -177,17 +185,17 @@ struct ContentView: View {
                         }
                         .padding(.top, 350)
                         
-                        // Tasto Reset
+                        // Reset button
                         Button(action: {
                             if counter > 0 {
                                 counter = 0
-                                generateHapticFeedback() // Vibrazione quando resettiamo
+                                generateHapticFeedback() // Vibration when resetting
                             } else {
-                                shakeButtonAndNumber()  // Vibrazione quando il contatore è già 0
+                                shakeButtonAndNumber()  // Shake when the counter is already 0
                             }
                         }) {
                             Text("RESET")
-                                .font(.custom("Droid 1997", size:60))
+                                .font(.custom("Droid 1997", size: 60))
                                 .background(Color(red: 28/255, green: 28/255, blue: 28/255))
                                 .foregroundColor(.white)
                                 .cornerRadius(8)
