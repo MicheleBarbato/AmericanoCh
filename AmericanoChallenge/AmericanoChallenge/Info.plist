@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key></key>
+	<string></string>
+	<key>UIAppFonts</key>
+	<array>
+		<string>Droid 1997.otf</string>
+		<string>naghashi-Light.otf</string>
+		<string>Minisystem.otf</string>
+		<string>Big Pixel Light demo.otf</string>
+		<string>basis33.ttf</string>
+		<string>poxel-font.ttf</string>
+		<string>Minecraft.ttf</string>
+	</array>
+</dict>
+</plist>
